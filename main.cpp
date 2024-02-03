@@ -188,7 +188,8 @@ void display(void){
 	    glDisable(GL_LIGHTING); // Desliga a Luz para desenhar o texto
 	    glColor3f(0.0, 0.0, 0.0); // seleciona a cor preta para o texto
 	    float x = -reshape_ratio-0.45;
-	    draw_text_stroke(x-0.5 , 1.25, "SCORE: " + to_string(score));
+	    glTranslatef(0.0, 0.0, 3.0);
+	    draw_text_stroke(x-0.5, 1.25, "SCORE: " + to_string(score));
     glPopMatrix();
     glEnable(GL_LIGHTING);
 
@@ -211,11 +212,11 @@ void update(int value) {
 	        Pipe& pipe = *it; 
 	        // Faça algo com o item, por exemplo, desenhe
 	        pipe.setXCoord(pipe.getXCoord()+decremento);
-	        if (pipe.getXCoord() < -4.0f){
+	        if (pipe.getXCoord() < -5.5f){
 				pipeList.dequeue(pipe);
-				pipeList.enqueue(Pipe(8, randomNumber(-2.0, 2.0), 0, gap));
+				pipeList.enqueue(Pipe(6.5, randomNumber(-2.0, 2.0), 0, gap));
 				score++;
-				if(score > 0 && score%4 == 0){
+				if(score > 0 && score%3  == 0){
 					newJumpStrength += newJumpStrength*0.02;
 					gravity += gravity*0.02;
 					decremento += decremento*0.06;
