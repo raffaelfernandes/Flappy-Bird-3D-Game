@@ -13,9 +13,18 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <ctime>
+#include <vector>
+#include <cmath>
 #include "Object.cpp"
 #include "LinkedList.cpp"
 #include "glut_text.h"
+
+struct Montanha {
+    std::vector<float> coordenadas_x;
+    std::vector<float> coordenadas_y;
+};
+
+Montanha montanha;
 
 float xPlayer = -3.5;
 float yPlayer = 0;
@@ -31,14 +40,21 @@ double decremento = -0.02f;
 
 int score = 0;
 int scoreScreen = 0;
+int scoreLavender = 30;
+
+
 int chaosSeed = 0;
 int stopScore = 0;
 int chaosDuration = 0;
 int stopChaos = 0;
 
+int crono = 0;
+
 bool gameOver = false;
 bool chaosMode = false;
 bool change = false;
+
+bool lavenderHaze = false;
 
 //
 // Armazenando os modos de iluminacao
@@ -48,16 +64,16 @@ float light0[4][4] = {
 {0.1f, 0.1f, 0.1f, 1.f}, // ambiente
 {0.8f, 0.8f, 0.8f, 1.f}, // diffuse
 {1.f, 1.f, 1.f, 1.f}, // specular
-{3.0f, 1.0f, 2.0f, 1.f} // position
+{3.0f, 1.5f, 2.0f, 1.f} // position
 };
 	
 float globalAmb1[] = {0.05f, 0.05f, 0.05f, 0.5f};
 float light1[4][4] = {
-		{0.05f, 0.05f, 0.05f, 0.5f}, // ambiente
-		{0.8f, 0.8f, 0.8f, 1.f}, // diffuse
-		{1.f, 1.f, 1.f, 1.f}, // specular
-		{12.0f, 1.0f, 0.0f, 1.f} // position
-		};
+{0.05f, 0.05f, 0.05f, 0.5f}, // ambiente
+{0.8f, 0.8f, 0.8f, 1.f}, // diffuse
+{1.f, 1.f, 1.f, 1.f}, // specular
+{12.0f, 1.0f, 0.0f, 1.f} // position
+};
 //
 //
 
@@ -71,6 +87,7 @@ void display(void);
 void reshape (int w, int h);
 void update(int value);
 float randomNumber(float min, float max);
+Montanha generate();
 
 Player player = Player::Player(xPlayer, yPlayer, zPlayer, false);
 LinkedList<Pipe> pipeList;
@@ -79,6 +96,7 @@ int main(int argc, char** argv) {
     // Inicializa a semente para a função rand() usando o tempo atual
     std::srand(static_cast<unsigned int>(std::time(NULL)));	
     chaosSeed = randomNumber(8, 16);
+    montanha = generate();
 	
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -136,7 +154,6 @@ void reshape (int w, int h){
     // Define a matriz de modelo e visualização
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-	
 }
 
 void keyboard (unsigned char key, int x, int y){
@@ -148,55 +165,164 @@ void keyboard (unsigned char key, int x, int y){
         case 27: // Esc
             exit(0);
             break;
+        case 'm': // m
+        case 'M':
+        	if(scoreLavender >= 30){
+        		scoreScreen -= 10;
+        		crono = 3;
+        		scoreLavender = 0;
+        		lavenderHaze = true;
+			}
+			break;
     }
 }
 
 void drawBackground(bool chaosMode){
-	if(!chaosMode){
+	if(!chaosMode && !lavenderHaze){
 		glPushMatrix();
-			glTranslatef(0.0, -0.8f, -2.0);
+			glTranslatef(0.0, -4.1f, -4.0);
+			glScalef(1.1, 1.1, 1.1);
 			glColor3f(0.28f, 0.22f, 0.16f);
-			glBegin(GL_POLYGON);
-				glVertex3f(-7.f, -3.f, 0.f);
-				glVertex3f(-5.f, -1.f, 0.f);
-				glVertex3f(-4.5f, 0.f, 0.f);
-				glVertex3f(-2.0f, 1.2f, 0.f);
-				glVertex3f(0.7f, 1.3f, 0.f);
-				glVertex3f(1.2f, -0.5f, 0.f);
-				glVertex3f(1.7f, 0.5f, 0.f);
-				glVertex3f(1.8f, 0.6f, 0.f);
-				glVertex3f(6.0f, -3.f, 0.f);
-			glEnd();
+		
+		    glBegin(GL_POLYGON);
+		    for (size_t i = 0; i < montanha.coordenadas_x.size(); ++i) {
+		        glVertex2f(montanha.coordenadas_x[i], montanha.coordenadas_y[i]); // Desenha os vértices da montanha
+		    }
+		    glEnd();
+		glPopMatrix();
+		
+		// nuvem direita cima
+		glPushMatrix();
+		glColor3f(0.94f, 0.94f, 1.0f);
+		glTranslatef(1.4, 0.5, -3.0);
+		glPushMatrix();
+			glTranslatef(0.4, 0.0, 0.0);
+			glutSolidSphere(0.5, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(1.0, 0.0, 0.0);
+			glutSolidSphere(0.45, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(0.1, -0.02, 0.3);
+			glutSolidSphere(0.3, 40, 40);
+		glPopMatrix();
+		glPopMatrix();
+		
+		// nuvem esquerda
+		glPushMatrix();
+		glTranslatef(-4.0, -1.2, -3.0);
+		glPushMatrix();
+			glTranslatef(0.4, 0.0, 0.0);
+			glutSolidSphere(0.7, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(1.2, 0.0, -0.2);
+			glutSolidSphere(0.4, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(-0.1, -0.01, 0.34);
+			glutSolidSphere(0.41, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(0.3, 0.4, 0.3);
+			glutSolidSphere(0.3, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(0.8, -0.1, 0.2);
+			glutSolidSphere(0.4, 40, 40);
+		glPopMatrix();
 		glPopMatrix();
 		return;
 	}
-	glColor3f(0.02f, 0.14f, 0.02f);
-	glBegin(GL_QUADS);
-		glVertex3f(-7.0f, 7.0f, -3.0f);
-		glVertex3f(7.0f, 7.0f, -3.0f);
-		glVertex3f(7.0f, -7.0f, -3.0f);
-		glVertex3f(-7.0f, -7.0f, -3.0f);
-	glEnd();
-	
-	//SOL
-	// glPushMatrix();
-	// 	glTranslatef(3.5, 1.2f, -2.2f);
-	// 	glColor3f(1.f, 1.f, 0.0f);
-	// 	glBegin(GL_POLYGON);
-	// 		glVertex3f(0.f, 1.f, 0.f);
-	// 		glVertex3f(0.8f, 0.7f, 0.0f);
-	// 		glVertex3f(1.f, 0.f, 0.0f);
-	// 		glVertex3f(0.8f, -0.8f, 0.0f);
-	// 		glVertex3f(0.f, -1.f, 0.0f);
-	// 		glVertex3f(-0.5f, -0.5f, 0.0f);
-	// 		glVertex3f(-1.f, 0.f, 0.f);
-	// 		glVertex3f(-0.5f, 0.5f, 0.0f);
-			//glVertex3f(0.f, 0.f, 0.f);
-			//glVertex3f(0.f, 0.f, 0.f);
-			//glVertex3f(0.f, 0.f, 0.f);
-			//glVertex3f(0.f, 0.f, 0.f);
-	// 	glEnd();
-	// glPopMatrix();
+	if (chaosMode){
+		glColor3f(0.02f, 0.14f, 0.02f);
+		glBegin(GL_QUADS);
+			glVertex3f(-7.0f, 7.0f, -3.0f);
+			glVertex3f(7.0f, 7.0f, -3.0f);
+			glVertex3f(7.0f, -7.0f, -3.0f);
+			glVertex3f(-7.0f, -7.0f, -3.0f);
+		glEnd();
+	}
+	if(lavenderHaze){
+		// nuvem direita cima
+		glPushMatrix();
+		glColor3f(0.8f, 0.5f, 0.8f);
+		glTranslatef(1.4, 0.5, -3.0);
+		glPushMatrix();
+			glTranslatef(0.4, 0.0, 0.0);
+			glutSolidSphere(0.5, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(1.0, 0.0, 0.0);
+			glutSolidSphere(0.45, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(0.1, -0.02, 0.3);
+			glutSolidSphere(0.3, 40, 40);
+		glPopMatrix();
+		glPopMatrix();
+		
+		// nuvem esquerda
+		glPushMatrix();
+		glColor3f(0.8f, 0.5f, 0.8f);
+		glTranslatef(-4.0, -1.2, -3.0);
+		glPushMatrix();
+			glTranslatef(0.4, 0.0, 0.0);
+			glutSolidSphere(0.7, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(1.2, 0.0, -0.2);
+			glutSolidSphere(0.4, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(-0.4, -0.02, 0.3);
+			glutSolidSphere(0.35, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(-0.1, -0.01, 0.34);
+			glutSolidSphere(0.41, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(0.3, 0.4, 0.3);
+			glutSolidSphere(0.3, 40, 40);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(0.8, -0.1, 0.2);
+			glutSolidSphere(0.4, 40, 40);
+		glPopMatrix();
+		glPopMatrix();
+		
+		// nuvem direita baixo
+		// glPushMatrix();
+		// glColor3f(0.8f, 0.5f, 0.8f);
+		// glTranslatef(4.0, -2.0, -3.0);
+		// glPushMatrix();
+		// 	glTranslatef(0.4, 0.0, 0.0);
+		// 	glutSolidSphere(0.7, 40, 40);
+		// glPopMatrix();
+		// glPushMatrix();
+		// 	glTranslatef(1.2, 0.0, -0.2);
+		// 	glutSolidSphere(0.4, 40, 40);
+		// glPopMatrix();
+		// glPushMatrix();
+		// 	glTranslatef(-0.4, -0.02, 0.3);
+		// 	glutSolidSphere(0.35, 40, 40);
+		// glPopMatrix();
+		// glPushMatrix();
+		// 	glTranslatef(-0.1, -0.01, 0.34);
+		// 	glutSolidSphere(0.41, 40, 40);
+		// glPopMatrix();
+		// glPushMatrix();
+		// 	glTranslatef(0.3, 0.4, 0.3);
+		// 	glutSolidSphere(0.3, 40, 40);
+		// glPopMatrix();
+		// glPushMatrix();
+		// 	glTranslatef(0.8, -0.1, 0.2);
+		// 	glutSolidSphere(0.4, 40, 40);
+		// glPopMatrix();
+		// glPopMatrix();
+	}
 }
 
 void changeLighting(bool chaosMode){
@@ -235,9 +361,11 @@ void display(void){
     if(change){
 		changeLighting(chaosMode);
 	}
+	
     drawBackground(chaosMode);
-    player.drawPlayer();
-	pipeList.drawList(decremento);
+    player.drawPlayer(lavenderHaze);
+	pipeList.drawList(decremento, lavenderHaze );
+	
 	
 	glPushMatrix();
 		// Desenhando textos na janela GLUT
@@ -247,9 +375,31 @@ void display(void){
 	     // seleciona a cor para o texto
 	    float x = -reshape_ratio-0.45;
 	    glTranslatef(0.0, 0.0, 3.0);
-	    draw_text_stroke(x-0.5, 1.25, "SCORE: " + to_string(score));
+	    draw_text_stroke(x-0.5, 1.25, "SCORE: " + to_string(scoreScreen));
+	    if(chaosMode){
+	    	glColor3f(0.02, 0.09, 1.0);
+			glTranslatef(0.0, 0.2, 0.0);
+	    	draw_text_stroke(x-0.5, 1.25, "!~~~~ MIDNIGHT ~~~~!");
+		}
+		if(lavenderHaze){
+	    	glColor3f(0.8f, 0.5f, 0.8f);
+			glTranslatef(0.0, 0.2, 0.0);
+	    	draw_text_stroke(x-0.5, 1.25, "!~~~~ LAVENDER HAZE  ~~~~!");
+		}
     glPopMatrix();
+    
     glEnable(GL_LIGHTING);
+    
+    //
+    // ICONE AVISANDO SOBRE LAVENDER HAZE MODE
+    //
+ //    if(scoreLavender >= 30){
+	// 	glPushMatrix();
+	// 	glColor3f(0.8f, 0.5f, 0.8f);
+	// 	glTranslatef(-2.8, -1.2, 3.0);
+ //    	glutWireSphere(0.1, 10, 10);
+ //    	glPopMatrix();
+	// }
 
     glutSwapBuffers();
 }
@@ -274,10 +424,18 @@ void update(int value) {
 				pipeList.dequeue(pipe);
 				pipeList.enqueue(Pipe(6.5, randomNumber(-2.0, 2.0), 0, gap));
 				score++;
+				scoreScreen++;
+				scoreLavender++;
+				
+				if (crono > 0){
+					crono-=1;
+					if (crono == 0) lavenderHaze = false;
+				}
+				
 				if(score > 0 && score%4  == 0){
 					newJumpStrength += newJumpStrength*0.02;
 					gravity += gravity*0.02;
-					decremento += decremento*0.06;
+					decremento += decremento*0.05;
 					
 				}
 				// chama o chaosMode
@@ -287,7 +445,7 @@ void update(int value) {
 					chaosDuration = randomNumber(5, 11);
 					stopChaos = score + chaosDuration;
 				}
-				if(score > stopChaos){
+				if(score > stopChaos && chaosMode){
 					chaosMode = false;
 					change = true;
 					chaosSeed = randomNumber(8, 15);
@@ -295,7 +453,7 @@ void update(int value) {
 				
 				
 			}
-			if (xEP <= (pipe.getXCoord()+1.0) && xDP >= pipe.getXCoord()){
+			if (xEP <= (pipe.getXCoord()+1.0) && xDP >= pipe.getXCoord() && !lavenderHaze){
 				if (((player.getYCoord()) <= pipe.getYCoord()-(gap/2)) || (player.getYCoord()) >= pipe.getYCoord()+ (gap/2)){
 					gameOver = true;
 				}
@@ -317,4 +475,22 @@ float randomNumber(float min, float max) {
     float numeroFloat = static_cast<float>(numeroInteiro) / 1000.0f;
 
     return numeroFloat;
+}
+
+Montanha generate() {
+    Montanha montanha;
+    const int numPontos = 30; // Número de pontos para a montanha
+    const float larguraMontanha = 14.0f; // Largura da montanha
+    const float alturaMontanha = 4.0f; // Altura da montanha
+
+    for (int i = 0; i < numPontos; ++i) {
+        float t = static_cast<float>(i) / (numPontos - 1); // Parâmetro paramétrico variando de 0 a 1
+        float x = -7.0f + t * larguraMontanha; // Variação ao longo do eixo x
+        float y = alturaMontanha * sin(3.14f * t); // Altura da montanha calculada com uma função senoidal
+
+        montanha.coordenadas_x.push_back(x); // Adiciona a coordenada x à montanha
+        montanha.coordenadas_y.push_back(y); // Adiciona a coordenada y à montanha
+    }
+
+    return montanha;
 }

@@ -83,10 +83,10 @@ public:
         return Iterator(NULL);
     }
 
-    void drawList(float decremento) const {
+    void drawList(float decremento, bool lavenderHaze) const {
         Node* current = head;
         while (current) {
-            current->data.drawPipe(decremento);
+            current->data.drawPipe(decremento, lavenderHaze);
             current = current->next;
         }
         std::cout << std::endl;
