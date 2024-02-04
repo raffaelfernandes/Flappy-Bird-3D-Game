@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Layout>
 	<Files>
-		<File Name="main.cpp" Top="Yes" Tabpos="1" TopLine="177">
-			<Cursor Line="191" Column="28"/>
+		<File Name="main.cpp" Top="Yes" Tabpos="1" TopLine="157">
+			<Cursor Line="159" Column="10"/>
 		</File>
-		<File Name="Object.cpp" Top="No" Tabpos="2" TopLine="53">
-			<Cursor Line="61" Column="26"/>
+		<File Name="Object.cpp" Top="No" Tabpos="2" TopLine="65">
+			<Cursor Line="95" Column="36"/>
+			<Selection Line="95" Column="40"/>
 		</File>
 	</Files>
 </Layout>
