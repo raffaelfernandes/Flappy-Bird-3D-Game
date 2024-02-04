@@ -40,7 +40,7 @@ double decremento = -0.02f;
 
 int score = 0;
 int scoreScreen = 0;
-int scoreLavender = 30;
+int scoreLavender = 20;
 
 
 int chaosSeed = 0;
@@ -178,6 +178,7 @@ void keyboard (unsigned char key, int x, int y){
 }
 
 void drawBackground(bool chaosMode){
+    
 	if(!chaosMode && !lavenderHaze){
 		glPushMatrix();
 			glTranslatef(0.0, -4.1f, -4.0);
@@ -233,7 +234,7 @@ void drawBackground(bool chaosMode){
 			glutSolidSphere(0.4, 40, 40);
 		glPopMatrix();
 		glPopMatrix();
-		return;
+		//return;
 	}
 	if (chaosMode){
 		glColor3f(0.02f, 0.14f, 0.02f);
@@ -251,15 +252,15 @@ void drawBackground(bool chaosMode){
 		glTranslatef(1.4, 0.5, -3.0);
 		glPushMatrix();
 			glTranslatef(0.4, 0.0, 0.0);
-			glutSolidSphere(0.5, 40, 40);
+			glutSolidSphere(0.5, 20, 20);
 		glPopMatrix();
 		glPushMatrix();
 			glTranslatef(1.0, 0.0, 0.0);
-			glutSolidSphere(0.45, 40, 40);
+			glutSolidSphere(0.45, 20, 20);
 		glPopMatrix();
 		glPushMatrix();
 			glTranslatef(0.1, -0.02, 0.3);
-			glutSolidSphere(0.3, 40, 40);
+			glutSolidSphere(0.3, 20, 20);
 		glPopMatrix();
 		glPopMatrix();
 		
@@ -269,27 +270,27 @@ void drawBackground(bool chaosMode){
 		glTranslatef(-4.0, -1.2, -3.0);
 		glPushMatrix();
 			glTranslatef(0.4, 0.0, 0.0);
-			glutSolidSphere(0.7, 40, 40);
+			glutSolidSphere(0.7, 20, 20);
 		glPopMatrix();
 		glPushMatrix();
 			glTranslatef(1.2, 0.0, -0.2);
-			glutSolidSphere(0.4, 40, 40);
+			glutSolidSphere(0.4, 20, 20);
 		glPopMatrix();
 		glPushMatrix();
 			glTranslatef(-0.4, -0.02, 0.3);
-			glutSolidSphere(0.35, 40, 40);
+			glutSolidSphere(0.35, 20, 20);
 		glPopMatrix();
 		glPushMatrix();
 			glTranslatef(-0.1, -0.01, 0.34);
-			glutSolidSphere(0.41, 40, 40);
+			glutSolidSphere(0.41, 20, 20);
 		glPopMatrix();
 		glPushMatrix();
 			glTranslatef(0.3, 0.4, 0.3);
-			glutSolidSphere(0.3, 40, 40);
+			glutSolidSphere(0.3, 20, 20);
 		glPopMatrix();
 		glPushMatrix();
 			glTranslatef(0.8, -0.1, 0.2);
-			glutSolidSphere(0.4, 40, 40);
+			glutSolidSphere(0.4, 20, 20);
 		glPopMatrix();
 		glPopMatrix();
 		
@@ -322,6 +323,14 @@ void drawBackground(bool chaosMode){
 		// 	glutSolidSphere(0.4, 40, 40);
 		// glPopMatrix();
 		// glPopMatrix();
+	}
+	//ICONE AVISANDO SOBRE LAVENDER HAZE MODE
+	if(scoreLavender >= 30){
+		glPushMatrix();
+			glColor3f(0.8f, 0.5f, 0.8f);
+			glTranslatef(-2.8, -1.2, 3.0);
+	    	glutWireSphere(0.1, 10, 10);
+    	glPopMatrix();
 	}
 }
 
@@ -389,17 +398,6 @@ void display(void){
     glPopMatrix();
     
     glEnable(GL_LIGHTING);
-    
-    //
-    // ICONE AVISANDO SOBRE LAVENDER HAZE MODE
-    //
- //    if(scoreLavender >= 30){
-	// 	glPushMatrix();
-	// 	glColor3f(0.8f, 0.5f, 0.8f);
-	// 	glTranslatef(-2.8, -1.2, 3.0);
- //    	glutWireSphere(0.1, 10, 10);
- //    	glPopMatrix();
-	// }
 
     glutSwapBuffers();
 }
