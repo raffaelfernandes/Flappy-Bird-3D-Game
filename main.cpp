@@ -41,10 +41,10 @@ double decremento = -0.02f;
 int score = 0;
 int scoreScreen = 0;
 int scoreLavender = 20;
+int highscore = 0;
 
 
 int chaosSeed = 0;
-int stopScore = 0;
 int chaosDuration = 0;
 int stopChaos = 0;
 
@@ -53,6 +53,7 @@ int crono = 0;
 bool gameOver = false;
 bool chaosMode = false;
 bool change = false;
+bool newHS = false;
 
 bool lavenderHaze = false;
 
@@ -88,6 +89,7 @@ void reshape (int w, int h);
 void update(int value);
 float randomNumber(float min, float max);
 Montanha generate();
+void resetGame();
 
 Player player = Player::Player(xPlayer, yPlayer, zPlayer, false);
 LinkedList<Pipe> pipeList;
@@ -172,8 +174,13 @@ void keyboard (unsigned char key, int x, int y){
         		crono = 3;
         		scoreLavender = 0;
         		lavenderHaze = true;
+        		if (newHS) highscore -= 10;
 			}
 			break;
+		case 'r': // r - tecla para reiniciar o jogo
+        case 'R':
+            resetGame(); // Reinicia o jogo
+            break;
     }
 }
 
@@ -358,10 +365,7 @@ void changeLighting(bool chaosMode){
 
 void display(void){
 	// Apaga o video e o depth buffer, e reinicia a matriz
-	if (gameOver){
-		std::cout << "Game Over!" << std::endl;
-	    exit(0);
-	}
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -379,12 +383,11 @@ void display(void){
 	glPushMatrix();
 		// Desenhando textos na janela GLUT
 	    glDisable(GL_LIGHTING); // Desliga a Luz para desenhar o texto
-	    if(chaosMode) glColor3f(1.0, 1.0, 1.0);
-	    if(!chaosMode) glColor3f(0.0, 0.0, 0.0);
+	    glColor3f(1.0f, 1.0f, 0.0f);
 	     // seleciona a cor para o texto
 	    float x = -reshape_ratio-0.45;
 	    glTranslatef(0.0, 0.0, 3.0);
-	    draw_text_stroke(x-0.5, 1.25, "SCORE: " + to_string(scoreScreen));
+	    draw_text_stroke(x-0.5, 1.25, "HIGHSCORE: " + to_string(highscore));
 	    if(chaosMode){
 	    	glColor3f(0.02, 0.09, 1.0);
 			glTranslatef(0.0, 0.2, 0.0);
@@ -395,6 +398,11 @@ void display(void){
 			glTranslatef(0.0, 0.2, 0.0);
 	    	draw_text_stroke(x-0.5, 1.25, "!~~~~ LAVENDER HAZE  ~~~~!");
 		}
+  		
+  		if(chaosMode) glColor3f(1.0, 1.0, 1.0);
+	    if(!chaosMode) glColor3f(0.0, 0.0, 0.0);
+		glTranslatef(0.0, -0.1, 0.0);
+		draw_text_stroke(x-0.5, 1.25, "SCORE: " + to_string(scoreScreen));
     glPopMatrix();
     
     glEnable(GL_LIGHTING);
@@ -410,6 +418,7 @@ void update(int value) {
         
         if (player.getYCoord() < -4.5f || player.getYCoord() > 4.5f){
 			gameOver = true;
+			resetGame();
 		}
         
         LinkedList<Pipe>::Iterator it = pipeList.begin();
@@ -424,6 +433,10 @@ void update(int value) {
 				score++;
 				scoreScreen++;
 				scoreLavender++;
+				if (highscore < scoreScreen){
+					highscore = scoreScreen;
+					newHS = true;
+				}
 				
 				if (crono > 0){
 					crono-=1;
@@ -454,6 +467,7 @@ void update(int value) {
 			if (xEP <= (pipe.getXCoord()+1.0) && xDP >= pipe.getXCoord() && !lavenderHaze){
 				if (((player.getYCoord()) <= pipe.getYCoord()-(gap/2)) || (player.getYCoord()) >= pipe.getYCoord()+ (gap/2)){
 					gameOver = true;
+					resetGame();
 				}
 			}
 	    }
@@ -491,4 +505,37 @@ Montanha generate() {
     }
 
     return montanha;
+}
+
+void resetGame() {
+    // Redefinir todas as variáveis do jogo para seus valores iniciais
+    gameOver = false;
+    change = chaosMode;
+    chaosMode = false;
+    lavenderHaze = false;
+    player.setIsJumping(false);
+    newHS = false;
+    score = 0;
+    scoreScreen = 0;
+    scoreLavender = 20;
+    jumpStrength = 0.04f;
+    newJumpStrength = jumpStrength;
+    gravity = 0.0015f;
+    decremento = -0.02f;
+    crono = 0;
+    stopChaos = 0;
+    chaosDuration = 0;
+    chaosSeed = randomNumber(8, 16);
+    xPlayer = -3.5;
+    yPlayer = 0;
+    zPlayer = 0;
+    player.setXCoord(xPlayer);
+    player.setYCoord(yPlayer);
+    player.setZCoord(zPlayer);
+    xEP = xPlayer;
+    xDP = xPlayer + 0.4;
+    pipeList.clear(); // Limpa a lista de tubos
+    pipeList.enqueue(Pipe(0, randomNumber(-2.0, 2.0), 0, gap));
+    pipeList.enqueue(Pipe(4, randomNumber(-2.0, 2.0), 0, gap));
+    pipeList.enqueue(Pipe(8, randomNumber(-2.0, 2.0), 0, gap));
 }
